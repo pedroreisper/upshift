@@ -1,0 +1,17 @@
+# prompt<TAB>expect   (expect = gear number 1-5, or "silent")
+fix the typo in the site header	silent
+read this file and tell me what it does	silent
+review the auth module and write tests for the validation	2
+explora o código e desenha a arquitectura nova	2
+migrate every page in app/ to the new router	3
+audita todo o codebase à procura de vulnerabilidades	3
+refactor all the API handlers across the repo	3
+process these 40 records the same way	3
+run the full integration test suite and report failures	4
+corre toda a suite de testes em segundo plano	4
+do a deep research pass on this topic while I work	4
+keep checking the deploy and ping me when it's live	5
+every morning send me a digest	5
+lembra-me de verificar isto daqui a uma hora	5
+how does the upshift hook work	silent
+run a workflow that refactors the handlers	3
