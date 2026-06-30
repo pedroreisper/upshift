@@ -31,59 +31,96 @@ META_RX = re.compile(
 )
 
 # ── Gear 5 — scheduled / recurring / polling.
+# Bare nouns (cron / poll / monitor / daily / recurring) are common CODE words, so
+# every term is anchored to a scheduling INTENT — never matched on its own.
 GEAR5_RX = re.compile(
     r"\b(every (morning|day|night|hour|week|\d+\s*(min|m|h|hours?|minutes?))|"
     r"todos os dias|todas as (manh[ãa]s|noites)|de \d+ em \d+\s*(min|m|h|hora)|"
-    r"cada \d+\s*(min|m|h|hora)|keep (checking|watching|polling|an eye)|"
-    r"continua a (verificar|checar|monitorizar)|poll(ing)?\b|monitor(ize|ise)?\b|"
-    r"when the (deploy|build|ci|run|job) (finishes|is done|completes)|"
-    r"quando (o |a )?(deploy|build|ci|corrida|job) (acabar|terminar)|"
-    r"remind me|lembra[- ]me|recurring|recorrente|peri[óo]dic|on a schedule|"
-    r"agenda(r)? (para|todos|isto para)|cron\b|daily|di[áa]ri[oa])\b",
+    r"cada \d+\s*(min|m|h|hora)|keep (checking|watching|polling|monitoring|an eye)|"
+    r"continua a (verificar|checar|monitorizar)|"
+    r"poll(ing)? (the|every|until|for|it)|monitor(ing)? (the|until|for changes|every|it)|"
+    r"watch (the |this )?(pr|deploy|build|run|ci|job|pipeline|status)|"
+    r"when (the |it |this )?(deploy|build|ci|run|job|pr|pipeline)?\s*"
+    r"(finishes|is done|completes|passes|is green|goes green|merges|lands)|"
+    r"quando (o |a )?(deploy|build|ci|corrida|job|pr) (acabar|terminar|passar|ficar verde)|"
+    r"remind me (to|about|when|in|tomorrow|at|every)|lembra[- ]me (de|que|quando|amanh)|"
+    r"recurring (task|job|check|run|reminder)|recorrente|periodic(ally|amente)?|"
+    r"on a (schedule|timer|cron)|(set ?up|schedule|create|run) (a )?cron|cron ?job|"
+    r"agenda(r)? (para|todos|isto para|um)|(daily|nightly|weekly|hourly) "
+    r"(digest|report|run|check|job|summary|at)|di[áa]ri[oa] (relat[óo]rio|resumo|check))\b",
     re.IGNORECASE,
 )
 
-# ── Gear 4 — long-running, independent (background).
+# ── Gear 4 — long-running, independent (background). Duration/size is the signal;
+# scrape/crawl are anchored to an object so the bare verbs don't over-fire.
 GEAR4_RX = re.compile(
-    r"\b(in the background|em segundo plano|background (this|it|the)|"
+    r"\b(in the background|em segundo plano|background (this|it|the)|run .{0,20}async|"
     r"run (the )?[\w ]{0,25}?(test suite|tests? suite|suite|build|benchmark)|"
     r"corre (toda |a )?[\w ]{0,20}?(suite|bateria) de testes|full test run|"
     r"(deep|thorough) research|investiga[çc][ãa]o (profunda|aprofundada)|"
-    r"scrape|crawl|long[- ]running|demora[r]? (muito|minutos|imenso)|"
-    r"while (i|we|you) (do|work|continue)|enquanto (eu |fa[çc]o |trabalho))\b",
+    r"scrap(e|ing) (all|every|the|a |\d|every )|crawl (the|all|every|\d|a )|"
+    r"takes? \d+\s*(min|mins|minutes?|h|hours?|hrs?)|\d+\s*(min|minutes?|hours?) to run|"
+    r"long[- ]?(running|build|run|job)|slow (build|test|suite)|"
+    r"demora[r]? (muito|minutos|imenso|horas)|"
+    r"while (i|we|you) (do|work|continue|carry)|enquanto (eu |fa[çc]o |trabalho))\b",
     re.IGNORECASE,
 )
 
 # ── Gear 3 — large, repetitive, parallelisable (Workflow / ultracode).
+_G3_NOUN = (r"ficheiros?|files?|m[óo]dulos?|modules?|componentes?|components?|"
+            r"endpoints?|rotas?|routes?|testes?|tests?|p[áa]ginas?|pages?|"
+            r"handlers?|languages?|locales?|l[íi]nguas?|translations?|tradu[çc][õo]es|"
+            r"customers?|clientes?|users?|utilizadores|registos?|registros?|records?|"
+            r"rows?|entradas?|entries|casos?|cases?|items?|itens")
 GEAR3_RX = re.compile(
     r"\b(workflow|ultracode|orquestra[çc][ãa]o|orchestrat\w*|"
-    r"(todos|todas) os? .{0,24}(ficheiros|files|m[óo]dulos|modules|componentes|"
-    r"components|endpoints|rotas|routes|testes|tests|p[áa]ginas|pages)|"
-    r"every (file|module|component|endpoint|route|test|page)\b|"
-    r"across the (whole |entire )?(codebase|repo(sitory)?|project)|"
+    r"(todos|todas) os? .{0,24}(" + _G3_NOUN + r")|"
+    r"(every|each) (file|module|component|endpoint|route|test|page|handler|language|one)\b|"
+    r"(go through|for) (each|every) \w+|across the (whole |entire )?(codebase|repo(sitory)?|project)|"
     r"(migra(r)?|migrate) (todos|tudo|all|the (whole|entire))|"
     r"refactor (all|every|the (whole|entire))|refactoriza(r)? tudo|"
     r"audita(r)? (tudo|todo o|a totalidade|todos)|"
     r"comprehensive (audit|review|sweep|refactor)|exhaustiv\w*|exaustiv\w*|"
-    r"em massa|in bulk|bulk\b|"
-    r"(dezenas|centenas|d[úu]zias) de|the same way|da mesma (forma|maneira)|"
-    r"\b\d{2,}\s+(ficheiros|files|items|itens|casos|cases|m[óo]dulos|modules|"
-    r"registos|registros|records|rows|entradas|entries))\b",
+    r"em massa|in bulk|bulk\b|faz tudo|trata de tudo|de forma aut[óo]noma|"
+    r"(dezenas|centenas|d[úu]zias|a dozen|dozens?|twelve|twenty|thirty|forty|fifty|"
+    r"sixty|seventy|eighty|ninety|hundreds?) (de |of )?\w*|the same way|da mesma (forma|maneira)|"
+    r"all \d+ (of |de )?|\d{2,}\s+(of (these|them|those)|" + _G3_NOUN + r")|"
+    r"\d+\s+(" + _G3_NOUN + r"))\b",
     re.IGNORECASE,
 )
 
-# ── Gear 2 — multiple independent concerns (light heuristic).
-# Two distinct work verbs joined by "and / e" → likely multi-concern.
+# ── Gear 2 — multiple independent concerns. Two work verbs joined by and/e/then,
+# but only fires when the verbs are DISTINCT concerns (capture both → checked in
+# classify()), so "debug and fix" (one concern) doesn't trip it.
+_G2_VERB = (r"review|rev[êe]|test|testa|document|documenta|refactor|refactoriza|"
+            r"explore|explora|design|desenha|audit|audita|debug|fix|corrige|"
+            r"benchmark|profile|validate|valida|write|escreve|add|adiciona|"
+            r"implement|implementa|migrate|migra|optimi[sz]e|optimiza")
 GEAR2_RX = re.compile(
-    r"\b(review|rev[êe]|test|testa|document|documenta|refactor|refactoriza|"
-    r"explore|explora|design|desenha|audit|audita|debug|fix|corrige|"
-    r"benchmark|profile|validate|valida)\b"
-    r".{0,40}\b(and|e|then|depois|tamb[ée]m|plus|\+)\b.{0,40}"
-    r"\b(review|rev[êe]|test|testa|document|documenta|refactor|refactoriza|"
-    r"explore|explora|design|desenha|audit|audita|debug|fix|corrige|"
-    r"benchmark|profile|validate|valida|write|escreve|add|adiciona)\b",
+    r"\b(" + _G2_VERB + r")\b.{0,40}\b(and|e|then|depois|tamb[ée]m|plus|\+)\b.{0,40}"
+    r"\b(" + _G2_VERB + r")\b",
     re.IGNORECASE,
 )
+# Verbs that mean the same concern — a pair from the same group is NOT two concerns.
+_G2_SYNONYMS = [
+    {"debug", "fix", "corrige", "corrigir"},
+    {"refactor", "refactoriza", "optimi[sz]e", "optimiza", "simplify"},
+    {"document", "documenta", "write", "escreve"},
+    {"test", "testa", "validate", "valida"},
+    {"review", "revê", "reve", "audit", "audita"},
+]
+
+
+def _two_distinct_concerns(v1: str, v2: str) -> bool:
+    """True only when the two Gear-2 verbs are different concerns (not synonyms like
+    debug/fix), so single-concern phrasings don't trigger a fan-out nudge."""
+    a, b = v1.lower(), v2.lower()
+    if a == b:
+        return False
+    for grp in _G2_SYNONYMS:
+        if any(re.fullmatch(s, a) for s in grp) and any(re.fullmatch(s, b) for s in grp):
+            return False
+    return True
 
 
 def classify(prompt: str) -> list[tuple[int, str]]:
@@ -113,7 +150,8 @@ def classify(prompt: str) -> list[tuple[int, str]]:
             "pipeline()/parallel() over it. Beats hand-spawning agents one by one. "
             "Say the cost shape in one line when you launch it.",
         ))
-    if GEAR2_RX.search(prompt):
+    g2 = GEAR2_RX.search(prompt)
+    if g2 and _two_distinct_concerns(g2.group(1), g2.group(3)):
         hits.append((
             2,
             "Gear 2 (fan out): ≥2 independent concerns here. Spawn parallel sub-agents "
