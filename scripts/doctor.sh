@@ -15,7 +15,7 @@ printf 'upshift doctor — %s\n\n' "$SKILL_DIR"
 # 1. Core files present
 for f in SKILL.md README.md LICENSE hooks/upshift_router.py hooks/install_hook.sh \
          references/gear-map.md references/shape-signals.md references/examples.md; do
-  [ -f "$SKILL_DIR/$f" ] && green "present: $f" || red "missing: $f"
+  if [ -f "$SKILL_DIR/$f" ]; then green "present: $f"; else red "missing: $f"; fi
 done
 
 # 2. Hook parses and runs

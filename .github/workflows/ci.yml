@@ -15,7 +15,7 @@ jobs:
       - name: Lint shell scripts
         run: |
           sudo apt-get update -qq && sudo apt-get install -y shellcheck
-          shellcheck hooks/install_hook.sh scripts/doctor.sh tests/run-tests.sh
+          shellcheck install.sh hooks/install_hook.sh scripts/doctor.sh tests/run-tests.sh
       - name: Syntax-check hook
         run: python3 -c "import ast; ast.parse(open('hooks/upshift_router.py').read())"
       - name: Run hook classification tests
